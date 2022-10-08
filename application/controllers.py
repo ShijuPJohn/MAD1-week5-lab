@@ -1,7 +1,7 @@
 import sqlalchemy
 from flask import render_template, current_app as app, request, redirect
 
-from application.models import Student, db, Enrollments
+from application.models import Student, db, Enrollments, Course
 
 course_dict = {"course_1": 1, "course_2": 2, "course_3": 3, "course_4": 4}
 
@@ -78,6 +78,18 @@ def update_students_post(sid):
         enrollment = Enrollments(estudent_id=sid, ecourse_id=course_dict[course])
         db.session.add(enrollment)
         db.session.commit()
-    print(form)
-
     return redirect("/")
+
+
+@app.route('/student/<sid>', methods=['GET'])
+def students_details_get(sid):
+    student = Student.query.filter(Student.student_id == sid).first()
+    enrollments = Enrollments.query.filter(Enrollments.estudent_id == sid).all()
+    course_ids = [i.ecourse_id for i in enrollments]
+    course_list = []
+    for index, cid in enumerate(course_ids):
+        print(index, cid)
+        course = Course.query.filter(Course.course_id == cid).first()
+        course_list.append([index + 1, course.course_code, course.course_name, course.course_description])
+    print(course_list)
+    return render_template("student_details.html", student=student, courses=course_list)
