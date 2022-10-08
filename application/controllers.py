@@ -43,5 +43,14 @@ def create_students_post():
     except sqlalchemy.exc.IntegrityError as e:
         return render_template("duplicate_rollnumber.html")
     except Exception as e:
-        print("Some Error Happened")
+        return render_template("misc_error.html")
+    return redirect("/")
+
+
+@app.route('/student/<sid>/delete', methods=['GET'])
+def delete_students_get(sid):
+    print("Delete method called with sid : ", sid)
+    Student.query.filter(Student.student_id == sid).delete()
+    Enrollments.query.filter(Enrollments.estudent_id == sid).delete()
+    db.session.commit()
     return redirect("/")
