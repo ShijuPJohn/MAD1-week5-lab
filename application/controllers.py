@@ -72,6 +72,12 @@ def update_students_post(sid):
         .update({"first_name": request.form["f_name"],
                  "last_name": request.form["l_name"]})
     db.session.commit()
+    Enrollments.query.filter(Enrollments.estudent_id == sid).delete()
+    course_list = form.getlist("courses")
+    for course in course_list:
+        enrollment = Enrollments(estudent_id=sid, ecourse_id=course_dict[course])
+        db.session.add(enrollment)
+        db.session.commit()
     print(form)
 
     return redirect("/")
