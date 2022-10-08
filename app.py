@@ -14,6 +14,7 @@ def create_app():
         app.config.from_object(LocalDevelopmentConfig)
     db.init_app(app)
     app.app_context().push()
+    db.create_all()
     return app
 
 
