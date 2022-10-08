@@ -1,3 +1,4 @@
+import sqlalchemy
 from flask import render_template, current_app as app, request, redirect
 
 from application.models import Student, db, Enrollments
@@ -25,19 +26,22 @@ def create_students_get():
 
 @app.route('/student/create', methods=['POST'])
 def create_students_post():
-    print(request.form)
-    form = request.form
-    student = Student(roll_number=form["roll"], first_name=form["f_name"], last_name=form["l_name"])
-    db.session.add(student)
-    db.session.commit()
-    students = Student.query.all()
-    sid = 0
-    if len(students) != 0:
-        sid = students[-1].student_id
-    print("Student_id", sid)
-    course_list = form.getlist("courses")
-    for course in course_list:
-        enrollment = Enrollments(estudent_id=sid, ecourse_id=course_dict[course])
-        db.session.add(enrollment)
+    try:
+        form = request.form
+        student = Student(roll_number=form["roll"], first_name=form["f_name"], last_name=form["l_name"])
+        db.session.add(student)
         db.session.commit()
+        students = Student.query.all()
+        sid = 0
+        if len(students) != 0:
+            sid = students[-1].student_id
+        course_list = form.getlist("courses")
+        for course in course_list:
+            enrollment = Enrollments(estudent_id=sid, ecourse_id=course_dict[course])
+            db.session.add(enrollment)
+            db.session.commit()
+    except sqlalchemy.exc.IntegrityError as e:
+        return render_template("duplicate_rollnumber.html")
+    except Exception as e:
+        print("Some Error Happened")
     return redirect("/")
