@@ -54,3 +54,24 @@ def delete_students_get(sid):
     Enrollments.query.filter(Enrollments.estudent_id == sid).delete()
     db.session.commit()
     return redirect("/")
+
+
+@app.route('/student/<sid>/update', methods=['GET'])
+def update_students_get(sid):
+    student = Student.query.filter(Student.student_id == sid).first()
+    enrollments = Enrollments.query.filter(Enrollments.estudent_id == sid).all()
+    courses = [i.ecourse_id for i in enrollments]
+    print("Update method called with sid : ", sid)
+    return render_template("update_student.html", student=student, courses=courses)
+
+
+@app.route('/student/<sid>/update', methods=['POST'])
+def update_students_post(sid):
+    form = request.form
+    Student.query.filter(Student.student_id == sid) \
+        .update({"first_name": request.form["f_name"],
+                 "last_name": request.form["l_name"]})
+    db.session.commit()
+    print(form)
+
+    return redirect("/")
