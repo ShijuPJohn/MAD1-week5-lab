@@ -58,17 +58,15 @@ def create_students_post():
         form = request.form
         student = Student(roll_number=form["roll"], first_name=form["f_name"], last_name=form["l_name"])
         db.session.add(student)
-        db.session.commit()
-        students = Student.query.all()
-        sid = 0
-        if len(students) != 0:
-            sid = students[-1].student_id
+        db.session.flush()
+        sid = student.student_id
         course_list = form.getlist("courses")
         course_dict = {"course_1": 1, "course_2": 2, "course_3": 3, "course_4": 4}
         for course in course_list:
             enrollment = Enrollments(estudent_id=sid, ecourse_id=course_dict[course])
             db.session.add(enrollment)
-            db.session.commit()
+            db.session.flush()
+        db.session.commit()
     except sqlalchemy.exc.IntegrityError as e:
         return render_template("duplicate_rollnumber.html")
     except Exception as e:
